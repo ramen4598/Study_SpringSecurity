@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-// DB에서 가져온 사용자 정보를 담는 클래스
+// 인증을 위해서 DB에서 가져온 사용자 정보를 담는 클래스
 public class CustomUserDetails implements UserDetails {
 
     private final UserEntity userEntity;

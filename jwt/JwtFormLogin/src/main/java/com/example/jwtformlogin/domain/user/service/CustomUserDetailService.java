@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-// DB에서 사용자 정보를 UserDetails의 구현체에 담아서 가져오는 클래스
+// 인증을 위해서 DB에서 사용자 정보를 UserDetails의 구현체에 담아서 가져오는 클래스
 @RequiredArgsConstructor
 @Service
 public class CustomUserDetailService implements UserDetailsService {
