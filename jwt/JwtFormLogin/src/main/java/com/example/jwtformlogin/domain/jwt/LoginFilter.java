@@ -25,11 +25,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
-        System.out.println("===================================");
-        System.out.println(username);
-        System.out.println(password);
-        System.out.println("===================================");
-
        // username, password를 받아서 토큰을 생성
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
@@ -43,13 +38,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             HttpServletResponse response,
                                             FilterChain chain,
                                             Authentication authResult) {
-
+        System.out.println("로그인 성공");
     }
 
     // 검증이 실패하면 실행
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-
+        System.out.println("로그인 실패");
     }
 
 }
