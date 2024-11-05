@@ -36,15 +36,17 @@ public class UserEntity {
     private Role role = Role.ROLE_USER;
 
     @Builder
-    public UserEntity(String username, String password) {
+    public UserEntity(String username, String password, Role role) {
         this.username = username;
         this.password = password;
+        this.role = role;
     }
 
     public static UserEntity of(JoinRequestDto request) {
         return UserEntity.builder()
                 .username(request.getUsername())
                 .password(request.getPassword())
+                .role(Role.ROLE_USER)
                 .build();
     }
 }

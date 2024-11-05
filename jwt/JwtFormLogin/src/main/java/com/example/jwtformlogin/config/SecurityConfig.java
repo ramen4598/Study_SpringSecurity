@@ -1,5 +1,7 @@
 package com.example.jwtformlogin.config;
 
+import com.example.jwtformlogin.domain.jwt.CustomAuthenticationEntryPoint;
+import com.example.jwtformlogin.domain.jwt.JWTFilter;
 import com.example.jwtformlogin.domain.jwt.JWTUtil;
 import com.example.jwtformlogin.domain.jwt.LoginFilter;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +53,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
 
-                // 커스텀 login filter를 UsernamePasswordAuthenticationFilter 대신에 추가
+                // jwt token 유효성 검사를 위한 필터 추가
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
+                // login : 커스텀 login filter를 UsernamePasswordAuthenticationFilter 대신에 추가
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
 
                 //.logout(AbstractHttpConfigurer::disable) // logout 설정을 비활성화
@@ -62,7 +66,8 @@ public class SecurityConfig {
                 // /api/** 경로로 들어오는 요청에 대해 인증되지 않은 경우 401 UNAUTHORIZED 응답을 반환
                 .exceptionHandling((exceptionHandling) -> exceptionHandling
                         .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                //new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                new CustomAuthenticationEntryPoint(HttpStatus.UNAUTHORIZED), // log를 찍기 위해 커스텀한 EntryPoint
                                 new AntPathRequestMatcher("/api/**")
                         )
                 )

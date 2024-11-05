@@ -1,6 +1,5 @@
 package com.example.jwtformlogin.domain.jwt;
 
-import com.example.jwtformlogin.domain.user.controller.JoinController;
 import com.example.jwtformlogin.domain.user.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +27,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.jwtUtil = jwtUtil;
     }
 
-    // username, password를 받아서 검증
+    // username, password를 받아서 인증
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
@@ -43,13 +42,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         return authenticationManager.authenticate(authToken);
     }
 
-    // 검증이 성공하면 실행
+    // 인증이 성공하면 실행
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
                                             Authentication authentication) {
-        log.info("로그인 성공");
+        log.info("login success");
 
         // 토큰 생성
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -67,10 +66,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("Authorization", "Bearer " + token);
     }
 
-    // 검증이 실패하면 실행
+    // 인증이 실패하면 실행
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        log.info("로그인 실패");
+        log.info("login fail");
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
