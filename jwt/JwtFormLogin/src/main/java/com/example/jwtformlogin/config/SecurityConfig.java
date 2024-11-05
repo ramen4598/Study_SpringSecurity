@@ -53,7 +53,7 @@ public class SecurityConfig {
                             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
                                 CorsConfiguration configuration = new CorsConfiguration();
-                                configuration.setAllowedOrigins(Collections.singletonList(corsURL));
+                                configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
                                 configuration.setAllowCredentials(true); // 토큰을 주고받을 때는 credentials를 허용해야 함
                                 configuration.setAllowedHeaders(Collections.singletonList("*"));
