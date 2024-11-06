@@ -1,5 +1,6 @@
 package com.example.jwtformlogin.domain.jwt.filter;
 
+import com.example.jwtformlogin.domain.jwt.enums.TokenType;
 import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import com.example.jwtformlogin.domain.user.dto.CustomUserDetails;
 import com.example.jwtformlogin.domain.user.entity.UserEntity;
@@ -36,7 +37,7 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request , HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader(TokenType.ACCESS.getHeader());
 
         // token이 없거나 비어있는 경우
         if(token == null || token.isBlank()){
@@ -61,7 +62,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰의 카테고리가 access인지 확인
         String category = jwtUtil.getCategory(token);
-        if(!category.equals("access")){
+        if(!category.equals(TokenType.ACCESS.getCategory())){
             log.error("JWTFilter : Invalid Token Category");
 
             // reponse body

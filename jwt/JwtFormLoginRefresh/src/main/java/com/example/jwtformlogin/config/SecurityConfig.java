@@ -1,6 +1,7 @@
 package com.example.jwtformlogin.config;
 
 import com.example.jwtformlogin.domain.jwt.CustomAuthenticationEntryPoint;
+import com.example.jwtformlogin.domain.jwt.enums.TokenType;
 import com.example.jwtformlogin.domain.jwt.filter.JWTFilter;
 import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
 import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
@@ -62,7 +63,7 @@ public class SecurityConfig {
                                 configuration.setMaxAge(3600L); // 1시간동안 캐싱
 
                                 // 클라이언트에서 Authorization 헤더를 사용할 수 있도록 설정
-                                configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                                configuration.setExposedHeaders(Collections.singletonList(TokenType.ACCESS.getHeader()));
 
                                 return configuration;
                             }

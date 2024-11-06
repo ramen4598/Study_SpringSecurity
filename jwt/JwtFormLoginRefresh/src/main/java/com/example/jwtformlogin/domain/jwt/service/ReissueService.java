@@ -1,32 +1,51 @@
 package com.example.jwtformlogin.domain.jwt.service;
 
+import com.example.jwtformlogin.domain.jwt.entity.RefreshToken;
+import com.example.jwtformlogin.domain.jwt.enums.TokenType;
+import com.example.jwtformlogin.domain.jwt.error.NoRefreshTokenCookieException;
+import com.example.jwtformlogin.domain.jwt.error.NotExistRefreshTokenException;
+import com.example.jwtformlogin.domain.jwt.repository.RefreshRepository;
 import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
 import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import com.example.jwtformlogin.domain.jwt.error.ExpiredRefreshTokenException;
 import com.example.jwtformlogin.domain.jwt.error.WrongCategoryJwtException;
+import com.example.jwtformlogin.domain.user.entity.UserEntity;
+import com.example.jwtformlogin.domain.user.error.NotExistUserException;
+import com.example.jwtformlogin.domain.user.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 public class ReissueService {
 
-    @Value("${spring.jwt.access.expiration}")
-    private Long ACCESS_TOKEN_EXPIRE_TIME;
-    @Value("${spring.jwt.access.expiration}")
-    private Long REFRESH_TOKEN_EXPIRE_TIME;
-
     private static final Logger log = LoggerFactory.getLogger(ReissueService.class);
 
     private final JWTUtil jwtUtil;
     private final CookieUtil cookieUtil;
+    private final RefreshRepository refreshRepository;
+    private final UserRepository userRepository;
 
-    public void verifyRefresh(String refresh) {
+    public String verifyRefresh(HttpServletRequest request) {
+
+        // refresh token 가져오기
+        String refresh = null;
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(TokenType.REFRESH.getHeader())) {
+                refresh = cookie.getValue();
+            }
+        }
+        if (refresh == null) {
+            throw new NoRefreshTokenCookieException();
+        }
 
         // refresh token 검증
         try {
@@ -37,10 +56,18 @@ public class ReissueService {
 
         // category 확인
         String category = jwtUtil.getCategory(refresh);
-        if (!category.equals("refresh")) {
-            log.error("ReissueController : reissue : category is not refresh");
+        if (!category.equals(TokenType.REFRESH.getCategory())) {
             throw new WrongCategoryJwtException();
         }
+
+        // DB에 저장된 refresh token인지 확인
+        Boolean isExist = refreshRepository.existsByValue(refresh);
+        if(!isExist) {
+            log.error("refresh token not exist : {}", refresh);
+            throw new NotExistRefreshTokenException();
+        }
+
+        return refresh;
     }
 
     public String reissueAccess(String refresh) {
@@ -49,18 +76,31 @@ public class ReissueService {
         String role = jwtUtil.getRole(refresh);
 
         // make new access token
-        return jwtUtil.createJwt("access", username, role);
+        return jwtUtil.createJwt(TokenType.ACCESS, username, role);
     }
 
+    @Transactional
     public Cookie reissueRefresh(String refresh) {
 
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
 
         // make new refresh token
-        String newRefresh = jwtUtil.createJwt("refresh", username, role);
-        // TODO : save
+        String newRefresh = jwtUtil.createJwt(TokenType.REFRESH, username, role);
 
-        return cookieUtil.createCookie("refresh", newRefresh);
+        // delete old refresh token
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(NotExistUserException::new);
+        RefreshToken refreshToken = user.getRefreshTokens().stream()
+                .filter(rt -> rt.getValue().equals(refresh))
+                .findFirst()
+                .orElseThrow(NotExistRefreshTokenException::new);
+        user.getRefreshTokens().remove(refreshToken);
+        refreshRepository.deleteByValue(refresh);
+
+        // save new refresh token
+        jwtUtil.saveRefreshToken(username, newRefresh);
+
+        return cookieUtil.createCookie(TokenType.REFRESH.getHeader(), newRefresh);
     }
 }

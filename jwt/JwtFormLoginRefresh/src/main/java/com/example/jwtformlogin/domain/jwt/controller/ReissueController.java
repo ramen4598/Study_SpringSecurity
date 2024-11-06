@@ -1,7 +1,9 @@
 package com.example.jwtformlogin.domain.jwt.controller;
 
+import com.example.jwtformlogin.domain.jwt.enums.TokenType;
 import com.example.jwtformlogin.domain.jwt.service.ReissueService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,16 +22,16 @@ public class ReissueController {
     private final ReissueService reissueService;
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@CookieValue(value = "refresh") String refresh, HttpServletResponse response) {
+    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         log.info("ReissueController : reissue");
 
         // refresh token 검증
-        reissueService.verifyRefresh(refresh);
+        String refresh =  reissueService.verifyRefresh(request);
         String newAccess = reissueService.reissueAccess(refresh);
         Cookie newRefresh = reissueService.reissueRefresh(refresh);
 
-        response.addHeader("Authorization", newAccess);
+        response.addHeader(TokenType.ACCESS.getHeader(), newAccess);
         response.addCookie(newRefresh);
         return new ResponseEntity<>(HttpStatus.OK);
     }

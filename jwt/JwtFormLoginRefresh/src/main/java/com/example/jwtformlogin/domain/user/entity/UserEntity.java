@@ -1,5 +1,6 @@
 package com.example.jwtformlogin.domain.user.entity;
 
+import com.example.jwtformlogin.domain.jwt.entity.RefreshToken;
 import com.example.jwtformlogin.domain.user.dto.JoinRequestDto;
 import com.example.jwtformlogin.domain.user.enums.Role;
 import jakarta.persistence.Column;
@@ -9,7 +10,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +38,9 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
+
+    @OneToMany(mappedBy = "user")
+    private final List<RefreshToken> refreshTokens = List.of();
 
     @Builder
     public UserEntity(String username, String password, Role role) {

@@ -1,9 +1,9 @@
 package com.example.jwtformlogin.domain.jwt.filter;
 
+import com.example.jwtformlogin.domain.jwt.enums.TokenType;
 import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
 import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collection;
@@ -27,7 +27,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
 
     @Builder
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, CookieUtil cookieUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
+                       CookieUtil cookieUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.cookieUtil = cookieUtil;
@@ -65,12 +66,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = authority.getAuthority();
 
         // 토큰 생성
-        String access = jwtUtil.createJwt("access", username, role);
-        String refresh = jwtUtil.createJwt("refresh", username, role);
+        String access = jwtUtil.createJwt(TokenType.ACCESS, username, role);
+        String refresh = jwtUtil.createJwt(TokenType.REFRESH, username, role);
+        jwtUtil.saveRefreshToken(username, refresh);
 
         // 토큰을 헤더에 담아서 반환
-        response.setHeader("Authorization", access); // access token
-        response.addCookie(cookieUtil.createCookie("refresh", refresh));
+        response.setHeader(TokenType.ACCESS.getHeader(), access); // access token
+        response.addCookie(cookieUtil.createCookie(TokenType.REFRESH.getHeader(), refresh));
         response.setStatus(HttpStatus.OK.value());
     }
 
