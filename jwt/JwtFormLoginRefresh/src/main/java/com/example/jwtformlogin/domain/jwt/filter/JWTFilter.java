@@ -55,16 +55,7 @@ public class JWTFilter extends OncePerRequestFilter {
             jwtUtil.isExpired(token);
         }catch (ExpiredJwtException e){
             log.error("JWTFilter : Access Token is Expired");
-
-            // reponse body
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json");
-            response.getWriter().write(String.format("""
-                {
-                    "message": "%s",
-                    "code": "%s"
-                }
-            """, ErrorCode.ACCESS_TOKEN_EXPIRED.getMessage(), ErrorCode.ACCESS_TOKEN_EXPIRED.getCode()));
+            setResponse(response, ErrorCode.ACCESS_TOKEN_EXPIRED);
             return;
         }
 
@@ -72,12 +63,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String category = jwtUtil.getCategory(token);
         if(!category.equals(TokenType.ACCESS.getCategory())){
             log.error("JWTFilter : Invalid Token Category");
-
-            // reponse body
-            PrintWriter writer = response.getWriter();
-            writer.println("Invalid Token Category");
-
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            setResponse(response, ErrorCode.WRONG_CATEGORY_JWT);
             return;
         }
 
@@ -98,5 +84,16 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void setResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        response.setStatus(errorCode.getStatus().value());
+        response.setContentType("application/json");
+        response.getWriter().write(String.format("""
+                {
+                    "message": "%s",
+                    "code": "%s"
+                }
+            """, errorCode.getMessage(), errorCode.getCode()));
     }
 }

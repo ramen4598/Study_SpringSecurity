@@ -4,8 +4,8 @@
     {
       "entity": {
         "type": "Project",
-        "id": "51a234cb-5b69-4b27-840d-5350548cecf6",
-        "name": "SpringSecurity"
+        "id": "76d67382-d01f-4cea-9661-be0363a7d2ef",
+        "name": "Copy of SpringSecurity"
       },
       "children": [
         {
@@ -33,17 +33,11 @@
                 "version": "V11"
               },
               "host": "localhost:8080",
-              "path": "/admin"
+              "path": "/"
             },
-            "id": "a06f498e-7459-4525-ae95-7a10ac8189e9",
-            "name": "Admin",
-            "headers": [
-              {
-                "enabled": true,
-                "name": "Authorization",
-                "value": ""
-              }
-            ]
+            "id": "dbc1abf0-82f2-44e7-a871-62c3f8119739",
+            "name": "0. Main Page",
+            "headers": []
           }
         },
         {
@@ -82,8 +76,8 @@
               "host": "localhost:8080",
               "path": "/join"
             },
-            "id": "f208e4a0-0503-4758-8e51-cb1f3a02e8e9",
-            "name": "Join",
+            "id": "bc924c5c-7239-49eb-82d8-d75a291c9d47",
+            "name": "1. Join",
             "headers": [
               {
                 "enabled": true,
@@ -133,10 +127,10 @@
                 "version": "V11"
               },
               "host": "localhost:8080",
-              "path": "/login"
+              "path": "/user/login"
             },
-            "id": "dec138c8-73fa-401f-a7b7-afa4f611c67e",
-            "name": "Login",
+            "id": "9332beba-ef1e-4eca-b43d-c5b4ecf5ea77",
+            "name": "2. Login",
             "headers": [
               {
                 "enabled": true,
@@ -171,11 +165,17 @@
                 "version": "V11"
               },
               "host": "localhost:8080",
-              "path": "/"
+              "path": "/userinfo"
             },
-            "id": "77923edb-e001-44b3-8def-ba4f9f1e7c48",
-            "name": "Main Page",
-            "headers": []
+            "id": "d1e0e280-bfa4-4d3e-9593-856b117ad13e",
+            "name": "3. Userinfo",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "Authorization",
+                "value": ""
+              }
+            ]
           }
         },
         {
@@ -203,17 +203,83 @@
                 "version": "V11"
               },
               "host": "localhost:8080",
-              "path": "/userinfo"
+              "path": "/admin"
             },
-            "id": "48b1984a-87d5-46ac-888b-e45c9930a04a",
-            "name": "Userinfo",
+            "id": "821d27cf-5d91-418b-ab74-546a15bd3198",
+            "name": "4. Admin",
             "headers": [
               {
                 "enabled": true,
-                "name": " Authorization",
+                "name": "Authorization",
                 "value": ""
               }
             ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Form"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:8080",
+              "path": "/user/reissue"
+            },
+            "id": "3543f431-221f-48c2-8b02-fde2f02fec32",
+            "name": "5. Reissue",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:8080",
+              "path": "/user/logout"
+            },
+            "id": "09624899-14d1-4a91-a055-5fc10a576e1b",
+            "name": "6. Logout",
+            "headers": []
           }
         }
       ]

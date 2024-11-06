@@ -2,7 +2,9 @@ package com.example.jwtformlogin.config;
 
 import com.example.jwtformlogin.domain.jwt.CustomAuthenticationEntryPoint;
 import com.example.jwtformlogin.domain.jwt.enums.TokenType;
+import com.example.jwtformlogin.domain.jwt.filter.CustomLogoutFilter;
 import com.example.jwtformlogin.domain.jwt.filter.JWTFilter;
+import com.example.jwtformlogin.domain.jwt.repository.RefreshRepository;
 import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
 import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import com.example.jwtformlogin.domain.jwt.filter.LoginFilter;
@@ -25,6 +27,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -38,9 +41,15 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final CookieUtil cookieUtil;
+    private final RefreshRepository refreshRepository;
 
     @Value("${cors.url}")
     private String corsURL;
+
+    @Value("${spring.jwt.refresh.cookie.path}")
+    private String REFRESH_TOKEN_COOKIE_PATH;
+
+    private static final String LOGIN_URL = "/user/login";
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,6 +57,13 @@ public class SecurityConfig {
         String[] allowedOrigins = Arrays.stream(corsURL.split(","))
                 .map(String::trim)
                 .toArray(String[]::new);
+
+        LoginFilter myLoginFilter = LoginFilter.builder()
+                .authenticationManager(authenticationManager(authenticationConfiguration))
+                .jwtUtil(jwtUtil)
+                .cookieUtil(cookieUtil)
+                .build();
+        myLoginFilter.setFilterProcessesUrl(LOGIN_URL); // login url을 원하는 url로 변경
 
         return http
                 .cors((cors) -> cors
@@ -72,9 +88,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         // /login, /join, / 경로로 들어오는 요청은 인증이 필요하지 않음
                         .requestMatchers(
-                                new AntPathRequestMatcher("/login"),
+                                new AntPathRequestMatcher("/user/login"),
                                 new AntPathRequestMatcher("/join"),
-                                new AntPathRequestMatcher("/reissue"),
+                                new AntPathRequestMatcher("/user/reissue"),
                                 new AntPathRequestMatcher("/")
                         ).permitAll()
                         // /admin 경로로 들어오는 요청은 ADMIN 권한이 필요
@@ -91,17 +107,18 @@ public class SecurityConfig {
                 // form login, http basic, logout 설정을 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                //.logout(AbstractHttpConfigurer::disable) // logout 설정을 비활성화
 
                 // jwt token 유효성 검사를 위한 필터 추가
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                // login : 커스텀 login filter를 UsernamePasswordAuthenticationFilter 대신에 추가
-                .addFilterAt(LoginFilter.builder()
-                                .authenticationManager(authenticationConfiguration.getAuthenticationManager())
+                // login : 커스텀 login filter를 UsernamePasswordAuthenticationFilter와 동일한 위치에 추가
+                .addFilterAt(myLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                // logout : 커스텀 logout filter 추가
+                .addFilterBefore(CustomLogoutFilter.builder()
                                 .jwtUtil(jwtUtil)
-                                .cookieUtil(cookieUtil)
+                                .refreshRepository(refreshRepository)
+                                .REFRESH_TOKEN_COOKIE_PATH(REFRESH_TOKEN_COOKIE_PATH)
                                 .build()
-                        , UsernamePasswordAuthenticationFilter.class)
+                        , LogoutFilter.class)
 
                 // jwt token에서는 session 설정을 비활성화
                 .sessionManagement((management) -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

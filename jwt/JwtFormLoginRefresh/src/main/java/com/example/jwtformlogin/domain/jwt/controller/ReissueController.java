@@ -11,16 +11,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/user/reissue") // TODO : .env에 맞춰 수정
 public class ReissueController {
 
     private static final Logger log = LoggerFactory.getLogger(ReissueController.class);
     private final ReissueService reissueService;
 
-    @PostMapping("/reissue")
+    @PostMapping
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         log.info("ReissueController : reissue");
