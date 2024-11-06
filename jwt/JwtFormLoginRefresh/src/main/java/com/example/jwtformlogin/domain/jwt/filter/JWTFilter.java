@@ -39,7 +39,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String token = request.getHeader("Authorization");
 
-        if(Objects.isNull(token)) {
+        // token이 없거나 비어있는 경우
+        if(token == null || token.isBlank()){
             log.info("Request without Authorization header");
             filterChain.doFilter(request, response);
             return;
