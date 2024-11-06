@@ -2,7 +2,8 @@ package com.example.jwtformlogin.config;
 
 import com.example.jwtformlogin.domain.jwt.CustomAuthenticationEntryPoint;
 import com.example.jwtformlogin.domain.jwt.filter.JWTFilter;
-import com.example.jwtformlogin.domain.jwt.JWTUtil;
+import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
+import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import com.example.jwtformlogin.domain.jwt.filter.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -35,15 +36,7 @@ public class SecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-
-    // application.properties에서 설정한 값을 주입
-    // access, refresh token 발급에 사용
-    @Value("${spring.jwt.access.expiration}")
-    private Long ACCESS_TOKEN_EXPIRE_TIME;
-    @Value("${spring.jwt.refresh.expiration}")
-    private Long REFRESH_TOKEN_EXPIRE_TIME;
-    @Value("${spring.jwt.refresh.cookie.path}")
-    private String REFRESH_TOKEN_COOKIE_PATH;
+    private final CookieUtil cookieUtil;
 
     @Value("${cors.url}")
     private String corsURL;
@@ -74,7 +67,6 @@ public class SecurityConfig {
                                 return configuration;
                             }
                         })
-
                 )
                 .authorizeHttpRequests((auth) -> auth
                         // /login, /join, / 경로로 들어오는 요청은 인증이 필요하지 않음
@@ -106,9 +98,7 @@ public class SecurityConfig {
                 .addFilterAt(LoginFilter.builder()
                                 .authenticationManager(authenticationConfiguration.getAuthenticationManager())
                                 .jwtUtil(jwtUtil)
-                                .REFRESH_TOKEN_COOKIE_PATH(REFRESH_TOKEN_COOKIE_PATH)
-                                .ACCESS_TOKEN_EXPIRE_TIME(ACCESS_TOKEN_EXPIRE_TIME)
-                                .REFRESH_TOKEN_EXPIRE_TIME(REFRESH_TOKEN_EXPIRE_TIME)
+                                .cookieUtil(cookieUtil)
                                 .build()
                         , UsernamePasswordAuthenticationFilter.class)
 

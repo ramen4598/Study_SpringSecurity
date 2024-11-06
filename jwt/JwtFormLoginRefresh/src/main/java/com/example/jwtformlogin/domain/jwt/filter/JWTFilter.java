@@ -1,6 +1,6 @@
 package com.example.jwtformlogin.domain.jwt.filter;
 
-import com.example.jwtformlogin.domain.jwt.JWTUtil;
+import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import com.example.jwtformlogin.domain.user.dto.CustomUserDetails;
 import com.example.jwtformlogin.domain.user.entity.UserEntity;
 import com.example.jwtformlogin.domain.user.enums.Role;
@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

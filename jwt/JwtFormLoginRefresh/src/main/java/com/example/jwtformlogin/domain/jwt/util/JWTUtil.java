@@ -1,4 +1,4 @@
-package com.example.jwtformlogin.domain.jwt;
+package com.example.jwtformlogin.domain.jwt.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
@@ -13,6 +13,12 @@ import org.springframework.stereotype.Component;
 public class JWTUtil {
 
     private final SecretKey SECRET_KEY;
+
+    // application.properties에서 설정한 값을 주입
+    @Value("${spring.jwt.access.expiration}")
+    private Long ACCESS_TOKEN_EXPIRE_TIME;
+    @Value("${spring.jwt.refresh.expiration}")
+    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secretKey) {
         // SecretKey 생성
@@ -41,7 +47,13 @@ public class JWTUtil {
                 .parseSignedClaims(token).getPayload().get("category", String.class); // 토큰을 파싱하여 category를 반환
     }
 
-    public String createJwt(String category, String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role) {
+        // TODO : enum으로 변경
+        long expiredMs = switch (category) {
+            case "access" -> ACCESS_TOKEN_EXPIRE_TIME;
+            case "refresh" -> REFRESH_TOKEN_EXPIRE_TIME;
+            default -> throw new IllegalArgumentException("Unknown category");
+        };
         return Jwts.builder()
                 .claim("category", category) // access or refresh
                 .claim("username", username)

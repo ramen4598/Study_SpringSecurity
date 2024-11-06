@@ -1,6 +1,7 @@
 package com.example.jwtformlogin.domain.jwt.filter;
 
-import com.example.jwtformlogin.domain.jwt.JWTUtil;
+import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
+import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,21 +23,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private static final Logger log = LoggerFactory.getLogger(LoginFilter.class);
     private final JWTUtil jwtUtil;
+    private final CookieUtil cookieUtil;
     private final AuthenticationManager authenticationManager;
 
-    private final String REFRESH_TOKEN_COOKIE_PATH;
-    private final Long ACCESS_TOKEN_EXPIRE_TIME;
-    private final Long REFRESH_TOKEN_EXPIRE_TIME;
-
     @Builder
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-                       String REFRESH_TOKEN_COOKIE_PATH, Long ACCESS_TOKEN_EXPIRE_TIME,
-                       Long REFRESH_TOKEN_EXPIRE_TIME) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, CookieUtil cookieUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.REFRESH_TOKEN_COOKIE_PATH = REFRESH_TOKEN_COOKIE_PATH;
-        this.ACCESS_TOKEN_EXPIRE_TIME = ACCESS_TOKEN_EXPIRE_TIME;
-        this.REFRESH_TOKEN_EXPIRE_TIME = REFRESH_TOKEN_EXPIRE_TIME;
+        this.cookieUtil = cookieUtil;
     }
 
     // username, password를 받아서 인증
@@ -71,12 +65,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = authority.getAuthority();
 
         // 토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, ACCESS_TOKEN_EXPIRE_TIME); // access token
-        String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_TOKEN_EXPIRE_TIME);
+        String access = jwtUtil.createJwt("access", username, role);
+        String refresh = jwtUtil.createJwt("refresh", username, role);
 
         // 토큰을 헤더에 담아서 반환
         response.setHeader("Authorization", access); // access token
-        response.addCookie(createCookie("refresh", refresh));
+        response.addCookie(cookieUtil.createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
     }
 
@@ -84,18 +78,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         log.info("login fail");
-
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
-
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(REFRESH_TOKEN_EXPIRE_TIME.intValue());
-        cookie.setPath(REFRESH_TOKEN_COOKIE_PATH);
-        return cookie;
-    }
-
 }
