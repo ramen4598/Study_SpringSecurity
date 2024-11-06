@@ -1,5 +1,6 @@
-package com.example.jwtformlogin.domain.jwt;
+package com.example.jwtformlogin.domain.jwt.filter;
 
+import com.example.jwtformlogin.domain.jwt.JWTUtil;
 import com.example.jwtformlogin.domain.user.dto.CustomUserDetails;
 import com.example.jwtformlogin.domain.user.entity.UserEntity;
 import com.example.jwtformlogin.domain.user.enums.Role;

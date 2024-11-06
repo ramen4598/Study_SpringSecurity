@@ -1,9 +1,9 @@
 package com.example.jwtformlogin.config;
 
 import com.example.jwtformlogin.domain.jwt.CustomAuthenticationEntryPoint;
-import com.example.jwtformlogin.domain.jwt.JWTFilter;
+import com.example.jwtformlogin.domain.jwt.filter.JWTFilter;
 import com.example.jwtformlogin.domain.jwt.JWTUtil;
-import com.example.jwtformlogin.domain.jwt.LoginFilter;
+import com.example.jwtformlogin.domain.jwt.filter.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/login"),
                                 new AntPathRequestMatcher("/join"),
+                                new AntPathRequestMatcher("/reissue"),
                                 new AntPathRequestMatcher("/")
                         ).permitAll()
                         // /admin 경로로 들어오는 요청은 ADMIN 권한이 필요

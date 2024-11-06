@@ -1,5 +1,6 @@
-package com.example.jwtformlogin.domain.jwt;
+package com.example.jwtformlogin.domain.jwt.filter;
 
+import com.example.jwtformlogin.domain.jwt.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
