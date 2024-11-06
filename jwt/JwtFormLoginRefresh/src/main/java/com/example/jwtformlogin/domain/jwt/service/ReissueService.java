@@ -1,6 +1,5 @@
 package com.example.jwtformlogin.domain.jwt.service;
 
-import com.example.jwtformlogin.domain.jwt.entity.RefreshToken;
 import com.example.jwtformlogin.domain.jwt.enums.TokenType;
 import com.example.jwtformlogin.domain.jwt.error.NoRefreshTokenCookieException;
 import com.example.jwtformlogin.domain.jwt.error.NotExistRefreshTokenException;
@@ -9,13 +8,9 @@ import com.example.jwtformlogin.domain.jwt.util.CookieUtil;
 import com.example.jwtformlogin.domain.jwt.util.JWTUtil;
 import com.example.jwtformlogin.domain.jwt.error.ExpiredRefreshTokenException;
 import com.example.jwtformlogin.domain.jwt.error.WrongCategoryJwtException;
-import com.example.jwtformlogin.domain.user.entity.UserEntity;
-import com.example.jwtformlogin.domain.user.error.NotExistUserException;
-import com.example.jwtformlogin.domain.user.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +26,6 @@ public class ReissueService {
     private final JWTUtil jwtUtil;
     private final CookieUtil cookieUtil;
     private final RefreshRepository refreshRepository;
-    private final UserRepository userRepository;
 
     public String verifyRefresh(HttpServletRequest request) {
 
@@ -48,6 +42,7 @@ public class ReissueService {
         }
 
         // refresh token 검증
+        refresh = refresh.trim();
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
@@ -89,15 +84,9 @@ public class ReissueService {
         String newRefresh = jwtUtil.createJwt(TokenType.REFRESH, username, role);
 
         // delete old refresh token
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(NotExistUserException::new);
-        RefreshToken refreshToken = user.getRefreshTokens().stream()
-                .filter(rt -> rt.getValue().equals(refresh))
-                .findFirst()
-                .orElseThrow(NotExistRefreshTokenException::new);
-        user.getRefreshTokens().remove(refreshToken);
-        refreshRepository.deleteByValue(refresh);
-
+        jwtUtil.deleteAllRefreshToken(username);
+        // flush
+        refreshRepository.flush();
         // save new refresh token
         jwtUtil.saveRefreshToken(username, newRefresh);
 

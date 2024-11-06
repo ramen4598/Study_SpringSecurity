@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,8 +25,8 @@ public class RefreshToken {
     private Long id;
 
     // user 당 refresh token은 1개라면 unique = true
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
 
     @Column(name = "value", nullable = false)
@@ -38,10 +38,8 @@ public class RefreshToken {
     @Builder
     public RefreshToken(UserEntity user, String value, String expiration) {
         this.user = user;
-        this.user.getRefreshTokens().add(this);
+        this.user.updateRefreshToken(this);
         this.value = value;
         this.expiration = expiration;
     }
 }
-
-// TODO : 기한이 지난 토큰이 삭제되도록 스케줄링을 구현하거나 Redis를 사용하여 토큰을 관리하는 방법을 고려.

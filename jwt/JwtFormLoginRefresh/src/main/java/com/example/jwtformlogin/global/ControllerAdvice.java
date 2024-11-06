@@ -23,7 +23,7 @@ public class ControllerAdvice {
 
     @ExceptionHandler(ExpiredRefreshTokenException.class)
     public ResponseEntity<ErrorResponseDto> handleExpiredRefreshTokenException(ExpiredRefreshTokenException e) {
-        log.error("handleExpiredRefreshTokenException", e);
+        log.error("handleExpiredRefreshTokenException : Refresh Token Expired");
         return getResponse(ErrorCode.REFRESH_TOKEN_EXPIRED);
     }
 

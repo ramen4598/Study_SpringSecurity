@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,8 @@ public class UserEntity {
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
 
-    @OneToMany(mappedBy = "user")
-    private final List<RefreshToken> refreshTokens = List.of();
+    @OneToOne(mappedBy = "user")
+    private RefreshToken refreshTokens;
 
     @Builder
     public UserEntity(String username, String password, Role role) {
@@ -55,5 +56,9 @@ public class UserEntity {
                 .password(request.getPassword())
                 .role(Role.ROLE_USER)
                 .build();
+    }
+
+    public void updateRefreshToken(RefreshToken refreshToken) {
+        this.refreshTokens = refreshToken;
     }
 }

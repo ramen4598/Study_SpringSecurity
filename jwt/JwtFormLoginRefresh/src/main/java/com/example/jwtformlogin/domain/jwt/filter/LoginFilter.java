@@ -68,6 +68,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         // 토큰 생성
         String access = jwtUtil.createJwt(TokenType.ACCESS, username, role);
         String refresh = jwtUtil.createJwt(TokenType.REFRESH, username, role);
+        jwtUtil.deleteAllRefreshToken(username); // 기존 refresh token 삭제
         jwtUtil.saveRefreshToken(username, refresh);
 
         // 토큰을 헤더에 담아서 반환

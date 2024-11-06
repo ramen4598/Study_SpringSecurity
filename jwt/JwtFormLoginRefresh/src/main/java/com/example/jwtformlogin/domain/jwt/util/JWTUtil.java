@@ -82,4 +82,13 @@ public class JWTUtil {
 
         refreshRepository.save(newRefresh);
     }
+
+    @Transactional
+    public void deleteAllRefreshToken(String username) {
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(NotExistUserException::new);
+
+        refreshRepository.deleteAllByUser(user);
+    }
 }
